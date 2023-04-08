@@ -1,24 +1,36 @@
 import JSOM from "../src/index.js";
 
 const methods = {}
-methods.browse = async (req, res, object) => {
-    if (object.browse) {
-        object.browse(req, res)
+
+methods.read = async (req, res, object) => {
+    let pointer;
+    if (object.read) {
+        pointer = await object.read(req, res)
     } else {
-        const results = await object.getAll();
-        res.send([...results]);
+        if (req.params.id) {
+            pointer = await object.getById(req.params.id)
+        } else {
+            object.getAll().then((results) => {
+                res.send([...results]);
+            })
+        }
+    }
+    if (req.params.id && pointer) {
+        const fns = req.params[0].split('/');
+        for (let i = 0; i < fns.length; i++) {
+            if (pointer[fns[i]]) {
+                pointer = await pointer[fns[i]](req, res)
+            } else {
+                break;
+            }
+        }
+        if (!res.headersSent) {
+            res.send(pointer);
+        }
     }
 }
 
-methods.read = (req, res, object) => {
-    if (object.browse) {
-        object.browse(req, res)
-    } else {
-        res.send({});
-    }
-}
-
-methods.add = (req, res, object) => {
+methods.create = async (req, res, object) => {
     const instance = new object();
     if (instance.add) {
         instance.add(req, res)
@@ -29,16 +41,42 @@ methods.add = (req, res, object) => {
     }
 }
 
-methods.edit = (req, res, object) => {
-    
+methods.update = async (req, res, object) => {
+    const instance = await object.getById(req.params.id)
+    let pointer;
+    if (instance.edit) {
+        pointer = await instance.edit(req, res)
+    } else {
+        Object.assign(instance, req.body);
+        instance.save();
+        pointer = instance
+    }
+    if (pointer) {
+        const fns = req.params[0].split('/');
+        for (let i = 0; i < fns.length; i++) {
+            if (pointer[fns[i]]) {
+                pointer = await pointer[fns[i]](req, res)
+            } else {
+                break;
+            }
+        }
+        if (!res.headersSent) {
+            res.send(pointer);
+        }
+    }
 }
 
-methods.destroy = (req, res, object) => {
-    
+methods.delete = async (req, res, object) => {
+    if (object.destroy) {
+        object.destroy(req, res)
+    } else {
+        object.destroy(req.params.id)
+        res.send('Deleted');
+    }
 }
 export default function crudController(req, res) {
     const objects = JSOM.getObjects();
-    if (!objects[req.params.object] || !methods[req.params.method]) {
+    if (!objects[req.params.object] || (!methods[req.params.method] && !objects[req.params.object][req.params.method])) {
         res.send('Url Not Found')
         return;
     } else {

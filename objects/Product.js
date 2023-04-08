@@ -8,9 +8,10 @@ class Product extends JSOM {
     salePrice;
     orders;
     carts;
+    user;
 
     constructor() {
-        super()
+        super();
     }
 }
 

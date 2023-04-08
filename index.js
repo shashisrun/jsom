@@ -12,7 +12,7 @@ for (let i = 0; i < objects.length; i++) {
 
 const app = express();
 app.use(bodyParser.json());
-app.use('/:object/:method', crudController);
+app.use('/:object/:method/:id?/*', crudController);
 app.listen(3000, function () {
     console.log('Example app listening on port 3000!');
 });

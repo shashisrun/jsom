@@ -7,12 +7,18 @@ export default class JSOM {
         this.id = Date.now() + Math.floor(Math.random() * 100);
     }
     save() {
-        // console.log(this.constructor.name)
-        fs.promises.mkdir(`${process.env.JSOMPATH}/${this.constructor.name}`, { recursive: true }).then(() => {
-            fs.writeFile(`${process.env.JSOMPATH}/${this.constructor.name}/${this.id}.json`, JSON.stringify(this), (data) => {
+        const path = `${process.env.JSOMPATH}/${this.constructor.name}`;
+        if (fs.existsSync(path)) {
+            fs.writeFile(`${path}/${this.id}.json`, JSON.stringify(this), (data) => {
                 
             });
-        })
+        } else {
+            fs.promises.mkdir(`${path}`, { recursive: true }).then(() => {
+                fs.writeFile(`${path}/${this.id}.json`, JSON.stringify(this), (data) => {
+                    
+                });
+            })
+        }
     }
     static async getById(id) {
         try {
@@ -45,24 +51,6 @@ export default class JSOM {
         return results
     }
 
-    static readFiles(dirname, onFileContent, onError) {
-        fs.readdir(dirname, function (err, filenames) {
-            if (err) {
-                onError(err);
-                return;
-            }
-            filenames.forEach(function (filename) {
-                fs.readFile(dirname + filename, 'utf-8', function (err, content) {
-                    if (err) {
-                        onError(err);
-                        return;
-                    }
-                    onFileContent(filename, content);
-                });
-            });
-        });
-    }
-
     static define(object) {
         constructors[object.name] = object;
         return constructors[object.name];
@@ -71,11 +59,15 @@ export default class JSOM {
         return constructors;
     }
 
+    static destroy(id) {
+        return fs.unlinkSync(`${process.env.JSOMPATH}/${this.name}/${id}.json`);
+    }
+
     getReference() {
         return { $refid: this.id, $refto: this.constructor.name }
     }
 
-    getRelation(refrence) {
-        return constructors[refrence.$refto].get(refrence.$refid);
+    async getRelation(refrence) {
+        return await constructors[refrence.$refto].getById(refrence.$refid);
     }
 }

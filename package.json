@@ -1,0 +1,19 @@
+{
+  "name": "@shashisrun/jsom",
+  "version": "1.0.0",
+  "description": "A mininmal js library to persist class data",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shashisrun/jsom.git"
+  },
+  "author": "Shashi Sharma",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shashisrun/jsom/issues"
+  },
+  "homepage": "https://github.com/shashisrun/jsom#readme"
+}

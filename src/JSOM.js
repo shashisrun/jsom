@@ -55,7 +55,7 @@ export default class JSOM {
         constructors[object.name] = object;
         return constructors[object.name];
     }
-    static getObjects(object) {
+    static getObjects() {
         return constructors;
     }
 

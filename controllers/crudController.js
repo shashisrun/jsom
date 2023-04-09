@@ -18,8 +18,13 @@ methods.read = async (req, res, object) => {
     if (req.params.id && pointer) {
         const fns = req.params[0].split('/');
         for (let i = 0; i < fns.length; i++) {
-            if (pointer[fns[i]]) {
-                pointer = await pointer[fns[i]](req, res)
+            if (pointer[fns[i]] || pointer[parseInt(fns[i])]) {
+                const key = pointer[fns[i]] ? fns[i] : parseInt(fns[i]);
+                if (pointer[key] instanceof Function){
+                    pointer = await pointer[key](req, res)
+                } else {
+                    pointer = pointer[key]
+                }
             } else {
                 break;
             }
@@ -54,8 +59,13 @@ methods.update = async (req, res, object) => {
     if (pointer) {
         const fns = req.params[0].split('/');
         for (let i = 0; i < fns.length; i++) {
-            if (pointer[fns[i]]) {
-                pointer = await pointer[fns[i]](req, res)
+            if (pointer[fns[i]] || pointer[parseInt(fns[i])]) {
+                const key = pointer[fns[i]] ? fns[i] : parseInt(fns[i]);
+                if (pointer[key] instanceof Function) {
+                    pointer = await pointer[key](req, res)
+                } else {
+                    pointer = pointer[key]
+                }
             } else {
                 break;
             }
